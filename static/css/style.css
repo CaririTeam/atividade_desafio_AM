@@ -1,0 +1,182 @@
+body {
+  font-family: Arial, sans-serif;
+  margin: 0; /* Removido margem padrão para mais controle */
+  padding: 20px; /* Adicionado padding geral */
+  background-color: #FAF5E9; /* Bege/Creme Claro - Fundo da página */
+  color: #333333; /* Cor de texto padrão - pode ser ajustada se necessário */
+  text-align: center;
+}
+
+.logo-container {
+  text-align: center;
+  margin-bottom: 30px; /* Aumentado espaço abaixo do logo */
+}
+
+.logo-container img {
+  max-width: 250px; /* Define uma largura máxima para o logo */
+  height: auto;     /* Mantém a proporção */
+}
+
+h1, h2, h3, h4 { /* Aplicado a todos os cabeçalhos */
+  color: #2A5C38; /* Verde Escuro */
+}
+
+button {
+  padding: 12px 25px; /* Aumentado padding para botões mais robustos */
+  margin: 10px 5px;
+  border: none;
+  cursor: pointer;
+  background-color: #F48B29; /* Laranja */
+  color: white;
+  border-radius: 5px; /* Bordas levemente mais arredondadas */
+  font-size: 16px;
+  font-weight: bold;
+  transition: background-color 0.3s ease, transform 0.1s ease; /* Transição suave */
+}
+
+button:hover {
+  background-color: #E07A1F; /* Laranja um pouco mais escuro no hover */
+  transform: translateY(-1px); /* Leve efeito de elevação */
+}
+
+button:disabled {
+  background-color: #BDBDBD; /* Cinza neutro para desabilitado */
+  color: #757575;
+  cursor: not-allowed;
+  transform: none; /* Remove efeito de elevação */
+}
+
+#testResultsContainer {
+  margin-top: 30px;
+  background: #FFFFFF; /* Fundo branco para os cards de resultado */
+  padding: 20px;
+  border-radius: 8px; /* Bordas mais arredondadas */
+  box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.1); /* Sombra mais suave e pronunciada */
+  display: none;
+  text-align: left;
+}
+
+.model-results-section {
+    border: 1px solid #E0E0E0; /* Borda cinza bem clara */
+    padding: 20px;
+    margin-bottom: 25px;
+    border-radius: 6px;
+    background-color: #FCFCFC; /* Fundo levemente acinzentado para diferenciar */
+}
+
+.metrics-grid, .graphs-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); /* Ajustado minmax */
+    gap: 25px;
+    margin-top: 15px;
+}
+
+.metrics-block p {
+  margin: 8px 0;
+  font-size: 1em;
+}
+.metrics-block h4 {
+  margin-bottom: 10px;
+  border-bottom: 2px solid #88A039; /* Verde Oliva para sublinhar títulos de métricas */
+  padding-bottom: 5px;
+  color: #2A5C38; /* Verde Escuro */
+}
+
+
+.form-group {
+  margin-bottom: 15px;
+}
+
+input[type="number"] {
+  padding: 10px;
+  width: 230px;
+  margin: 5px;
+  border: 1px solid #88A039; /* Verde Oliva para borda */
+  border-radius: 4px;
+  text-align: center;
+  font-size: 1em;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+input[type="number"]:focus {
+  border-color: #F48B29; /* Laranja no foco */
+  box-shadow: 0 0 5px rgba(244, 139, 41, 0.5); /* Sombra laranja suave no foco */
+  outline: none;
+}
+
+#resultadoPredict {
+  margin-top: 20px;
+  padding: 12px;
+  border-radius: 4px;
+  font-size: 1.1em; /* Levemente maior */
+  font-weight: bold;
+  display: none;
+  margin-left: auto;
+  margin-right: auto;
+  max-width: 550px;
+  border-width: 2px; /* Borda mais grossa */
+  border-style: solid;
+}
+
+/* Estilos para sucesso na predição (verde) */
+#resultadoPredict.success {
+  background: #E6F5E9; /* Verde bem claro para fundo */
+  color: #2A5C38;      /* Verde Escuro para texto */
+  border-color: #88A039;/* Verde Oliva para borda */
+}
+
+/* Estilos para erro na predição (usaremos o coral/vermelho) */
+#resultadoPredict.error {
+  background: #FEECE8; /* Coral/Vermelho bem claro para fundo */
+  color: #BF3A21;      /* Vermelho mais escuro para texto */
+  border-color: #E85D39;/* Coral para borda */
+}
+
+
+.graph-container {
+    text-align: center;
+}
+.graph-container h4{
+    margin-bottom: 10px;
+}
+
+.graph {
+  margin-top: 10px;
+  max-width: 100%;
+  height: auto;
+  border: 1px solid #D1D1D1; /* Cinza suave para borda da imagem */
+  border-radius: 4px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+}
+
+/* Spinner CSS */
+#loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 20px;
+  padding: 20px 0; /* Adicionado padding vertical no loading */
+}
+.spinner {
+  display: inline-block;
+  width: 40px;
+  height: 40px;
+  border: 4px solid #F48B29; /* Laranja para o spinner */
+  border-top-color: transparent;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+#resultsContent {
+  display: none;
+}
+
+hr {
+    border: 0;
+    height: 1px;
+    background: #D1D1D1; /* Cinza suave para a linha horizontal */
+    margin: 40px 0; /* Aumentado margem da linha */
+}
