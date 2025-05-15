@@ -1,5 +1,5 @@
 import matplotlib
-matplotlib.use('Agg')  # Use backend não interativo para evitar avisos de GUI
+matplotlib.use('Agg')
 
 from flask import Flask, render_template, request, jsonify
 import io
@@ -10,6 +10,7 @@ from sklearn.datasets import load_iris
 from sklearn.model_selection import train_test_split
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.svm import SVC
+from sklearn.tree import DecisionTreeClassifier # Novo modelo importado
 from sklearn.metrics import accuracy_score, precision_score, recall_score, confusion_matrix
 
 app = Flask(__name__)
@@ -17,69 +18,79 @@ app = Flask(__name__)
 # Armazenando múltiplos modelos
 models = {
     "knn": None,
-    "svm": None
+    "svm": None,
+    "decision_tree": None # Novo modelo adicionado
 }
 X_train, X_test, y_train, y_test = None, None, None, None
-iris_data = None
+iris_data = None # Cache para os dados do Iris
 
-@app.route('/')
-def home():
+def load_iris_dataset():
+    """Carrega o dataset Iris se ainda não estiver carregado."""
     global iris_data
     if iris_data is None:
         iris_data = load_iris()
+    return iris_data
+
+@app.route('/')
+def home():
+    load_iris_dataset()
     return render_template('front.html')
 
 @app.route('/train', methods=['POST'])
 def train():
-    global models, X_train, X_test, y_train, y_test, iris_data
-    if iris_data is None:
-        iris_data = load_iris()
-    X = iris_data.data
-    y = iris_data.target
+    global models, X_train, X_test, y_train, y_test
+    
+    current_iris_data = load_iris_dataset()
+    X = current_iris_data.data
+    y = current_iris_data.target
 
-    # Dividindo em treino e teste (70% treino, 30% teste)
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42)
 
-    # --- Treinando KNN ---
+    # Treinando KNN
     models["knn"] = KNeighborsClassifier(n_neighbors=3)
     models["knn"].fit(X_train, y_train)
 
-    # --- Treinando SVM ---
-    models["svm"] = SVC(kernel='linear', probability=True, random_state=42)
+    # Treinando SVM
+    models["svm"] = SVC(kernel='linear', probability=True, random_state=42) # probability=True para superfície de decisão
     models["svm"].fit(X_train, y_train)
 
-    return jsonify({"message": "Treinamento concluído para KNN e SVM"})
+    # Treinando Árvore de Decisão
+    models["decision_tree"] = DecisionTreeClassifier(random_state=42)
+    models["decision_tree"].fit(X_train, y_train)
+
+    return jsonify({"message": "Treinamento concluído para KNN, SVM e Árvore de Decisão"})
 
 def generate_metrics_and_plots(model, X_data_train, y_data_train, X_data_test, y_data_test, model_name_display):
-    """Helper function to generate metrics and plots for a given model."""
-    global iris_data
+    """Gera métricas, matriz de confusão e superfície de decisão para um modelo."""
+    current_iris_data = load_iris_dataset()
     results = {}
 
-    # --- Métricas de Treinamento ---
+    # Métricas de Treinamento
     y_pred_train = model.predict(X_data_train)
-    acc_train = accuracy_score(y_data_train, y_pred_train)
-    prec_train = precision_score(y_data_train, y_pred_train, average='weighted', zero_division=0)
-    rec_train = recall_score(y_data_train, y_pred_train, average='weighted', zero_division=0)
-    results["train_metrics"] = {"accuracy": round(acc_train, 3), "precision": round(prec_train, 3), "recall": round(rec_train, 3)}
+    results["train_metrics"] = {
+        "accuracy": round(accuracy_score(y_data_train, y_pred_train), 3),
+        "precision": round(precision_score(y_data_train, y_pred_train, average='weighted', zero_division=0), 3),
+        "recall": round(recall_score(y_data_train, y_pred_train, average='weighted', zero_division=0), 3)
+    }
 
-    # --- Métricas de Teste ---
+    # Métricas de Teste
     y_pred_test = model.predict(X_data_test)
-    acc_test = accuracy_score(y_data_test, y_pred_test)
-    prec_test = precision_score(y_data_test, y_pred_test, average='weighted', zero_division=0)
-    rec_test = recall_score(y_data_test, y_pred_test, average='weighted', zero_division=0)
-    results["test_metrics"] = {"accuracy": round(acc_test, 3), "precision": round(prec_test, 3), "recall": round(rec_test, 3)}
+    results["test_metrics"] = {
+        "accuracy": round(accuracy_score(y_data_test, y_pred_test), 3),
+        "precision": round(precision_score(y_data_test, y_pred_test, average='weighted', zero_division=0), 3),
+        "recall": round(recall_score(y_data_test, y_pred_test, average='weighted', zero_division=0), 3)
+    }
 
-    # --- Matriz de Confusão (Teste) ---
+    # Matriz de Confusão (Teste)
     cm_test = confusion_matrix(y_data_test, y_pred_test)
     plt.figure(figsize=(6, 5))
     plt.imshow(cm_test, interpolation='nearest', cmap=plt.cm.Blues)
     plt.title(f'Matriz de Confusão ({model_name_display} - Teste)')
     plt.colorbar()
-    tick_marks = np.arange(len(iris_data.target_names))
-    plt.xticks(tick_marks, iris_data.target_names, rotation=45, ha="right")
-    plt.yticks(tick_marks, iris_data.target_names)
+    tick_marks = np.arange(len(current_iris_data.target_names))
+    plt.xticks(tick_marks, current_iris_data.target_names, rotation=45, ha="right")
+    plt.yticks(tick_marks, current_iris_data.target_names)
     
-    # Adicionar números dentro da matriz
     thresh = cm_test.max() / 2.
     for i in range(cm_test.shape[0]):
         for j in range(cm_test.shape[1]):
@@ -93,24 +104,25 @@ def generate_metrics_and_plots(model, X_data_train, y_data_train, X_data_test, y
     
     buf_cm = io.BytesIO()
     plt.savefig(buf_cm, format='png')
+    plt.close() # Fechar a figura para liberar memória
     buf_cm.seek(0)
-    plt.close()
     results["confusion_matrix_b64"] = base64.b64encode(buf_cm.getvalue()).decode('utf-8')
 
-    # --- Superfície de Decisão (Teste - usando apenas 2 atributos para visualização) ---
-    # Seleciona apenas os dois últimos atributos (comprimento e largura da pétala) para visualização
+    # Superfície de Decisão (Teste - usando apenas 2 atributos para visualização)
+    # Usaremos comprimento e largura da pétala (índices 2 e 3)
     if X_data_train.shape[1] >= 4 and X_data_test.shape[1] >=4:
-        X_train_2_features = X_data_train[:, 2:4]
-        X_test_2_features = X_data_test[:, 2:4]
+        X_train_2_features = X_data_train[:, 2:4] # petal length e petal width
+        X_test_2_features = X_data_test[:, 2:4]   # petal length e petal width
 
-        # Treinar um novo modelo apenas com esses 2 atributos para a superfície de decisão
+        model_2_features = None
         if isinstance(model, KNeighborsClassifier):
             model_2_features = KNeighborsClassifier(n_neighbors=model.n_neighbors)
         elif isinstance(model, SVC):
-            # Para SVC, copie os parâmetros relevantes. Ex: kernel, C, gamma
-            model_2_features = SVC(kernel=model.kernel, C=model.C, gamma=model.gamma, random_state=model.random_state, probability=model.probability)
-        else: # Fallback para outros modelos, ou não gerar DS
-            model_2_features = None
+            model_2_features = SVC(kernel=model.kernel, C=model.C, gamma=model.gamma, 
+                                   random_state=model.random_state, probability=model.probability)
+        elif isinstance(model, DecisionTreeClassifier):
+            model_2_features = DecisionTreeClassifier(random_state=model.random_state, 
+                                                      max_depth=model.get_params().get('max_depth')) # Copia max_depth se existir
 
         if model_2_features:
             model_2_features.fit(X_train_2_features, y_data_train)
@@ -123,29 +135,28 @@ def generate_metrics_and_plots(model, X_data_train, y_data_train, X_data_test, y
             Z = model_2_features.predict(np.c_[xx.ravel(), yy.ravel()])
             Z = Z.reshape(xx.shape)
             
-            plt.figure(figsize=(7, 6)) # Ajuste o tamanho
-            plt.contourf(xx, yy, Z, alpha=0.3, cmap=plt.cm.coolwarm) # plt.cm.RdYlBu
+            plt.figure(figsize=(7, 6))
+            plt.contourf(xx, yy, Z, alpha=0.3, cmap=plt.cm.coolwarm)
             
-            # Plotar os pontos de teste
-            for i, target_name in enumerate(iris_data.target_names):
+            for i, target_name in enumerate(current_iris_data.target_names):
                 plt.scatter(X_test_2_features[y_data_test == i, 0], X_test_2_features[y_data_test == i, 1],
                             edgecolors='k', label=target_name, cmap=plt.cm.coolwarm, s=50)
 
-            plt.xlabel(f'{iris_data.feature_names[2]}')
-            plt.ylabel(f'{iris_data.feature_names[3]}')
+            plt.xlabel(f'{current_iris_data.feature_names[2]}') # Petal Length
+            plt.ylabel(f'{current_iris_data.feature_names[3]}') # Petal Width
             plt.title(f'Superfície de Decisão ({model_name_display} - Teste)')
             plt.legend(title="Classes Reais (Teste)")
             plt.tight_layout()
             
             buf_ds = io.BytesIO()
             plt.savefig(buf_ds, format='png')
+            plt.close() # Fechar a figura para liberar memória
             buf_ds.seek(0)
-            plt.close()
             results["decision_surface_b64"] = base64.b64encode(buf_ds.getvalue()).decode('utf-8')
         else:
-            results["decision_surface_b64"] = None
+            results["decision_surface_b64"] = None # Caso o modelo não seja um dos esperados para DS
     else:
-        results["decision_surface_b64"] = None
+        results["decision_surface_b64"] = None # Caso não haja features suficientes
 
     return results
 
@@ -153,20 +164,30 @@ def generate_metrics_and_plots(model, X_data_train, y_data_train, X_data_test, y
 def test():
     global models, X_test, y_test, X_train, y_train
     
+    if X_train is None: # Verifica se o treinamento já ocorreu
+        return jsonify({"error": "Modelos não treinados. Por favor, treine os modelos primeiro."}), 400
+
     response_data = {}
 
-    # --- Testar KNN ---
+    # Testar KNN
     if models["knn"] is None:
         return jsonify({"error": "Modelo KNN não treinado"}), 400
     response_data["knn"] = generate_metrics_and_plots(
         models["knn"], X_train, y_train, X_test, y_test, "KNN"
     )
 
-    # --- Testar SVM ---
+    # Testar SVM
     if models["svm"] is None:
         return jsonify({"error": "Modelo SVM não treinado"}), 400
     response_data["svm"] = generate_metrics_and_plots(
         models["svm"], X_train, y_train, X_test, y_test, "SVM"
+    )
+
+    # Testar Árvore de Decisão
+    if models["decision_tree"] is None:
+        return jsonify({"error": "Modelo Árvore de Decisão não treinado"}), 400
+    response_data["decision_tree"] = generate_metrics_and_plots(
+        models["decision_tree"], X_train, y_train, X_test, y_test, "Árvore de Decisão"
     )
     
     return jsonify(response_data)
@@ -174,45 +195,57 @@ def test():
 
 @app.route('/predict', methods=['POST'])
 def predict():
-    global models, X_train, y_train, iris_data # Adicionado iris_data
-    # Por enquanto, a predição usará apenas o KNN.
+    global models, X_train, y_train
+    
+    current_iris_data = load_iris_dataset()
+
+    # Predição ainda usa KNN por padrão. Será alterado na HU-003.
     if models["knn"] is None:
-        return jsonify({"error": "Modelo KNN não treinado"}), 400
+        return jsonify({"error": "Modelo KNN não treinado para predição. Treine os modelos primeiro."}), 400
     
     data = request.json
     try:
-        # Usar os nomes das features do dataset Iris para garantir a ordem correta
-        values = [
-            float(data.get(iris_data.feature_names[0].replace(" (cm)", "").replace(" ", "_"), 0.0)), # sepal length (cm)
-            float(data.get(iris_data.feature_names[1].replace(" (cm)", "").replace(" ", "_"), 0.0)), # sepal width (cm)
-            float(data.get(iris_data.feature_names[2].replace(" (cm)", "").replace(" ", "_"), 0.0)), # petal length (cm)
-            float(data.get(iris_data.feature_names[3].replace(" (cm)", "").replace(" ", "_"), 0.0))  # petal width (cm)
-        ]
-        # Fallback para os nomes antigos se os nomes do dataset não forem encontrados no request.json
-        if not any(key in data for key in [name.replace(" (cm)", "").replace(" ", "_") for name in iris_data.feature_names]):
-            values = [
-                float(data["sepal_length"]),
-                float(data["sepal_width"]),
-                float(data["petal_length"]),
-                float(data["petal_width"])
-            ]
+        # Usar os nomes das features do dataset Iris para garantir a ordem correta, removendo "(cm)" e espaços.
+        feature_keys_map = {name.replace(" (cm)", "").replace(" ", "_").lower(): name for name in current_iris_data.feature_names}
+        
+        # Tenta obter os valores usando os nomes mapeados. Se falhar, tenta os nomes originais como fallback.
+        values = []
+        for original_feature_name in current_iris_data.feature_names:
+            key_in_data = original_feature_name.replace(" (cm)", "").replace(" ", "_").lower()
+            if key_in_data in data:
+                values.append(float(data[key_in_data]))
+            elif original_feature_name.replace(" (cm)", "") in data: # Fallback para nome sem "_", mas com espaço
+                 values.append(float(data[original_feature_name.replace(" (cm)", "")]))
+            elif original_feature_name in data: # Fallback para nome original completo
+                 values.append(float(data[original_feature_name]))
+            else: # Fallback para os nomes fixos antigos se tudo mais falhar
+                if "sepal_length" in data and original_feature_name == current_iris_data.feature_names[0]:
+                    values.append(float(data["sepal_length"]))
+                elif "sepal_width" in data and original_feature_name == current_iris_data.feature_names[1]:
+                    values.append(float(data["sepal_width"]))
+                elif "petal_length" in data and original_feature_name == current_iris_data.feature_names[2]:
+                    values.append(float(data["petal_length"]))
+                elif "petal_width" in data and original_feature_name == current_iris_data.feature_names[3]:
+                    values.append(float(data["petal_width"]))
+                else:
+                    raise KeyError(f"Valor para '{original_feature_name}' não encontrado nos dados de entrada.")
+
+        if len(values) != 4: # Garante que temos 4 valores
+             raise ValueError("Número incorreto de features fornecidas.")
 
     except KeyError as e:
-        return jsonify({"error": f"Chave ausente nos dados de entrada: {e}. Esperado: sepal_length, sepal_width, petal_length, petal_width ou nomes correspondentes do dataset."}), 400
+        return jsonify({"error": f"Chave ausente ou nome de feature inválido nos dados de entrada: {str(e)}. Esperado: {', '.join([name.replace(' (cm)', '').replace(' ', '_').lower() for name in current_iris_data.feature_names])}"}), 400
     except ValueError:
-        return jsonify({"error": "Valores inválidos. Certifique-se de que todos os campos são números."}), 400
+        return jsonify({"error": "Valores inválidos. Certifique-se de que todos os campos são números e forneça todas as 4 features."}), 400
     except Exception as e:
-        return jsonify({"error": f"Erro ao processar dados: {str(e)}"}), 400
+        return jsonify({"error": f"Erro ao processar dados de predição: {str(e)}"}), 400
 
-
-    pred = models["knn"].predict([values])[0]
-    result = iris_data.target_names[pred]
+    pred_index = models["knn"].predict([values])[0]
+    pred_class_name = current_iris_data.target_names[pred_index]
     
-    # Calcula a acurácia do modelo KNN no conjunto de treino
-    acc_train_knn = models["knn"].score(X_train, y_train)
+    acc_train_knn = accuracy_score(y_train, models["knn"].predict(X_train)) # Recalcula para garantir
     
-    # Retorna o resultado com a acurácia formatada
-    return jsonify({"predicao": f"{result} (KNN - ACC Treino: {round(acc_train_knn*100, 0)}%)"})
+    return jsonify({"predicao": f"{pred_class_name} (Modelo KNN - Acurácia Treino: {round(acc_train_knn*100, 1)}%)"})
 
 
 if __name__ == '__main__':
