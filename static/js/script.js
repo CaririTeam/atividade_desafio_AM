@@ -55,7 +55,9 @@ document.addEventListener('DOMContentLoaded', () => {
             btnTestar.disabled = false;
             btnPredict.disabled = false;
             if (modelSelector && modelSelector.options.length > 0 && modelSelector.value === "") {
-                modelSelector.value = modelSelector.options[0].value;
+                if (modelSelector.options[0] && modelSelector.options[0].value) {
+                     modelSelector.value = modelSelector.options[0].value;
+                }
             }
         })
         .catch(error => {
@@ -72,9 +74,13 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function displayModelResults(modelData, modelDisplayName) {
-        if (!modelData || !modelData.train_metrics || !modelData.test_metrics) {
-            console.error(`Dados incompletos para o modelo ${modelDisplayName}`);
-            return '<p>Erro: Dados incompletos para exibir resultados.</p>';
+        if (!modelData) {
+            console.error(`Dados do modelo ${modelDisplayName} estão indefinidos ou nulos.`);
+            return `<p style="color: red; text-align:center;">Erro: Dados não recebidos para o modelo ${modelDisplayName}.</p>`;
+        }
+        if (!modelData.train_metrics || !modelData.test_metrics) {
+            console.error(`Dados de métricas incompletos para o modelo ${modelDisplayName}`, modelData);
+            return `<p style="color: red; text-align:center;">Erro: Métricas incompletas para o modelo ${modelDisplayName}.</p>`;
         }
 
         let trainAcc = (modelData.train_metrics.accuracy * 100).toFixed(1);
@@ -111,7 +117,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         <img class="graph" src="data:image/png;base64,${modelData.confusion_matrix_b64}" alt="Matriz de Confusão ${modelDisplayName}">
                     </div>`;
         } else {
-            modelHTML += `<div class="graph-container"><p>Matriz de Confusão não disponível.</p></div>`;
+            modelHTML += `<div class="graph-container"><p>Matriz de Confusão não disponível para ${modelDisplayName}.</p></div>`;
         }
         
         if (modelData.decision_surface_b64) {
@@ -121,7 +127,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         <img class="graph" src="data:image/png;base64,${modelData.decision_surface_b64}" alt="Superfície de Decisão ${modelDisplayName}">
                     </div>`;
         } else {
-             modelHTML += `<div class="graph-container"><p>Superfície de Decisão não disponível.</p></div>`;
+             modelHTML += `<div class="graph-container"><p>Superfície de Decisão não disponível para ${modelDisplayName}.</p></div>`;
         }
         modelHTML += `</div></div>`;
         return modelHTML;
@@ -149,22 +155,38 @@ document.addEventListener('DOMContentLoaded', () => {
         fetch(`/test_model?model_key=${selectedModelKey}`)
         .then(response => {
             if (!response.ok) {
-                return response.json().then(errData => { throw new Error(errData.error || `Erro HTTP: ${response.status}`); })
-                                   .catch(() => { throw new Error(`Erro HTTP: ${response.status}`); });
+                return response.json().then(errData => { 
+                    throw new Error(errData.error || `Erro HTTP: ${response.status}, ${response.statusText}`); 
+                }).catch(() => { 
+                    throw new Error(`Erro HTTP: ${response.status}, ${response.statusText}. Resposta não é JSON ou erro ao parsear.`); 
+                });
             }
             return response.json();
         })
         .then(data => {
+            console.log("Dados recebidos de /test_model:", JSON.stringify(data, null, 2));
+
             if (data.error) {
                 throw new Error(data.error);
             }
-            const modelKeyFromResult = Object.keys(data)[0];
+            
+            const modelKeysInData = Object.keys(data);
+            if (modelKeysInData.length === 0) {
+                throw new Error("Resposta do servidor vazia ou formato inesperado.");
+            }
+            const modelKeyFromResult = modelKeysInData[0]; 
             const modelData = data[modelKeyFromResult];
 
-            if (modelData && !modelData.error) {
+            console.log(`Chave do modelo na resposta: ${modelKeyFromResult}`);
+            console.log("Dados específicos do modelo (modelData):", JSON.stringify(modelData, null, 2));
+            console.log("Nome do modelo para display:", selectedModelName);
+
+            if (modelData && (modelData.train_metrics || modelData.test_metrics)) { // Checa se há pelo menos métricas
                 resultsContentDiv.innerHTML = displayModelResults(modelData, selectedModelName);
+            } else if (modelData && modelData.error) {
+                resultsContentDiv.innerHTML = `<p style="color: red; text-align:center;">Erro ao carregar resultados para ${selectedModelName}: ${modelData.error}</p>`;
             } else {
-                 resultsContentDiv.innerHTML = `<p style="color: red; text-align:center;">Erro ao carregar resultados para ${selectedModelName}: ${modelData?.error || 'Resposta inesperada.'}</p>`;
+                 resultsContentDiv.innerHTML = `<p style="color: orange; text-align:center;">Não foi possível exibir os resultados para ${selectedModelName}. Verifique os logs ou a resposta do servidor.</p>`;
             }
             resultsContentDiv.style.display = "block";
         })
@@ -205,7 +227,7 @@ document.addEventListener('DOMContentLoaded', () => {
       
         for (const key in payload) {
             if (key !== 'model_key' && isNaN(payload[key])) {
-                const friendlyKeyName = key.replace('_', ' ');
+                const friendlyKeyName = key.replace(/_/g, ' ');
                 alert(`Por favor, insira um valor numérico válido para ${friendlyKeyName}.`);
                 resultadoPredictDiv.textContent = `Erro: Valor inválido para ${friendlyKeyName}.`;
                 resultadoPredictDiv.classList.add('error');
