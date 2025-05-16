@@ -1,28 +1,37 @@
+/* Estilos base e da estrutura de novapagina.html (do seu colega) */
 *{
     margin: 0;
     padding: 0;
+    box-sizing: border-box; /* Adicionado para melhor controle de layout */
 }
 
 body{    
-   
     background-color: #252121;
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    min-height: 100vh; /* Garante que o corpo ocupe pelo menos a altura da tela */
     font-family: Arial, Helvetica, sans-serif;
+    color: #f0f0f0; /* Cor de texto padrão para o tema escuro */
 }
 
 a{
     text-decoration: none;
+    color: #a9d1ff; /* Cor de link padrão para tema escuro */
+}
+a:hover{
+    color: #ffffff;
 }
 
-/* Estilização do menu dropdown */
+header {
+    width: 100%;
+}
+
 nav{
     display: flex;
     flex-direction: column;
-    min-height: 15%;
+    /* min-height: 15%; */ /* Removido para maior flexibilidade */
     justify-content: space-around;
-    
+    width: 100%;
 }
 
 .container-nav{
@@ -30,251 +39,443 @@ nav{
     justify-content: center;    
     gap: 2rem;
     background-color: #ffffff;  
-    height: 15vh;
+    /* height: 15vh; */ /* Altura pode ser flexível */
+    padding: 15px 0;
     width: 100%;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
 }
 
 .imagem-descricao{
-    position: absolute;
+    position: absolute; /* Pode precisar de ajuste dependendo do fluxo */
     display: flex;
     flex-direction: row;
-    top: 2vh;
+    align-items: center;
+    top: 2vh; /* Ajustar conforme necessário */
+    left: 2vw; /* Ajustar conforme necessário */
+    z-index: 10;
 }
 
 .imagem-menu{
-   
-    position: absolute;
-    height: 5vw;
-    width: 5vw;
-    
+    height: 50px; /* Tamanho fixo para consistência */
+    width: 50px;
+    margin-right: 10px;
 }
-
 
 .rotulo-imagem{
-    position: absolute;
     display: flex;
     flex-direction: column;
-    top: 8px;
-    left: 70px;
-    font-size: 2.5vh;
+    font-size: 1.1em; /* Ajustado */
+    color: #333; /* Cor para texto sobre fundo claro do header */
+}
+.rotulo-imagem span {
+    line-height: 1.2;
 }
 
+nav ul{
+    list-style: none; /* Removido marcadores de lista */
+}
 nav li{
-    display: block;
-   
+    display: block; /* Mantido, mas pode ser inline-block se preferir menu horizontal */
+    position: relative; /* Para o dropdown */
 }
 
 nav li a{
     display: flex;
-    font-size: 25px;
+    font-size: 18px; /* Ajustado */
     color: #080227;        
-    font-weight: bolder;                    /*cor do texto navbar*/
+    font-weight: bolder;
     align-items: center;
     height: 100%;
-    padding-left: 15px;                          /*espaçamento do conteudo interno*/
-    padding-right: 15px;
-}
-
-nav li div a{
-    display: inline-block;
-    padding: 15px;
-    font-size: clamp(8px, 1.2vw, 1.2vw);
-    color:white;
-    
+    padding: 15px 20px; /* Ajustado padding */
+    transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 nav li a:hover{
-    
     color: #ffffff;
     background-color: #4e4e6d;
-    
 }
 
 .dropdown-menu{
     position: absolute;    
-    text-align: center;
+    text-align: left; /* Melhor para menus */
+    background-color: rgb(8, 1, 47); 
+    border-top: 3px solid #4e4e6d;
     opacity: 0;
     visibility: hidden; 
-    transform: translateX(-20%);   
+    transform: translateY(10px); /* Efeito de deslize suave */
+    transition: opacity 0.3s ease, visibility 0.3s ease, transform 0.3s ease;
+    z-index: 100; /* Garantir que fique sobre outros elementos */
+    min-width: 200px; /* Largura mínima para dropdown */
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
 }
 
 .dropdown-menu a{
-    
-    height: 10%;
     display: block;    
-    background-color: rgb(8, 1, 47);      
+    padding: 12px 15px;
+    font-size: 15px; /* Ajustado */
+    color:white;
+    font-weight: normal;
 }
 
 .dropdown:hover .dropdown-menu{
     opacity: 1;
     visibility: visible; 
-    transition-delay: 0.2s;   
-    z-index: 10;    
+    transform: translateY(0);
 }
 
 .dropdown-menu a:hover{
     background-color: rgb(5, 2, 93); 
 }
 
-
-
-/*Titulo do página - Sistema de gerenciamento de estoque*/
-
-
-.container-menu{
-    width: 100vw;
-}
-
-.abrir-menu{
-    visibility: hidden;
-}
-
-/*Estilização dos botões principais no centro da tela*/
 main{    
-    height: 80%;    
-    
+    flex-grow: 1; /* Permite que o main ocupe o espaço restante */
+    width: 100%;
+    position: relative; /* Para o tema-fundo */
+    padding: 20px;
 }
 
 .tema-fundo{
-   width: 100vw;
-    height: 100vh;
-    opacity: 30%;
+    position: absolute;
+    top:0;
+    left:0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover; /* Para cobrir todo o espaço */
+    opacity: 0.15; /* Ajustado para ser mais sutil */
+    z-index: -1; /* Para ficar atrás do conteúdo */
 }
-
-
 
 .secoes{
     display: flex;
+    flex-wrap: wrap; /* Permite que os itens quebrem linha em telas menores */
     justify-content: space-around;
-    gap: 5px;
-    position: absolute;
+    gap: 20px; /* Aumentado gap */
+    position: relative; /* Para não ser afetado pelo z-index do tema-fundo */
     width: 100%;
-    top: 40%;
+    margin-top: 40px; /* Espaço do topo */
+    margin-bottom: 40px;
 }
 
-.secoes div{
-    width: 40vh;
-    height: 50vh;
+.secoes div{ /* Estilo para os cards */
+    width: clamp(280px, 22%, 350px); /* Largura responsiva */
+    min-height: 300px; /* Altura mínima */
     border-radius: 10px;
-    background-color: rgba(99, 135, 236, 0.5);
+    background-color: rgba(50, 50, 70, 0.7); /* Cor de fundo para os cards */
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    color: #f0f0f0;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
 }
 
-main div span{
-    font-size: 5vh;
+.secoes div span{ /* Título dentro dos cards */
+    font-size: 1.8em; /* Ajustado */
     font-weight: bolder;
-     z-index:1;
+    margin-bottom: 15px;
+    color: #a9d1ff;
+}
+.secoes div p {
+    font-size: 0.9em;
+    line-height: 1.6;
+    flex-grow: 1; /* Para o parágrafo ocupar espaço */
+    margin-bottom: 15px;
 }
 
 .imagem-secao{
-    width: 30%;
-    margin: 0;
-    margin-bottom: 15% ;
+    width: 80px; /* Ajustado */
+    height: 80px;
+    margin-bottom: 20px;
 }
 
-main div img{
-    width: 10%;
-    margin-left: 90%;
+.secoes div a img{ /* Imagem da seta */
+    width: 30px;
+    height: 30px;
+    transition: transform 0.2s ease-in-out;
 }
-
-main div div{
-    
-    display: flex;
-    flex-direction: column  ;
-    align-items: center;
-    justify-content: end;
-    gap: 3%;
-    text-align: justify;
-    padding: 20px;
-    color: #ffffff;
-   
+.secoes div a:hover img{
+    transform: translateX(5px);
 }
 
 .barra{
-    width: 100vw;
-    height: 30vh;
+    width: 100%;
+    padding: 40px 20px; /* Padding aumentado */
     background-color: #020238;
-    align-items: center;
     text-align: center;
-    
+    margin: 40px 0;
 }
 
-main h1{
-    font-size: 4vh;
-    padding-top: 2%;
+.barra h1{
+    font-size: 2em; /* Ajustado */
     color: #ffffff;
 }
 
-/*Estilização do rodapé da página*/
 footer{ 
     display: flex;
     justify-content: space-around; 
-    padding-left: 4%;
     align-items: center; 
     background-color: #053530;
-    height: 15vh; 
-    
-}
-
-.img-logo{
-    height: 80%;
-    border-radius: 5px;
-}
-
-.img-redes-sociais{
-    display: flex;
-    flex-direction: row;
-    justify-content: center;
-    border-radius: 10px;
-}
-
-.img-container-redes-sociais{
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    width: 30%;
-    height: 70%;
-}
-
-footer ul{
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    text-decoration: none;
-    font-size: clamp(7px, 0.7vw, 0.7vw);
-}
-
-footer a img{                               /*Estilização das imagens do rodapé*/
-    width: 70%;
-    height: 70%;
-}
-
-footer img{
-    width: 10%;
-}
-
-footer a, li, div{
+    padding: 20px; 
+    width: 100%;
     color: rgb(144, 148, 148);
 }
+/* Adicionar mais estilos para o footer se necessário */
 
-footer li{
-    padding-bottom: 5px;
+
+/* --- ESTILOS PARA O CLASSIFICADOR DE ÍRIS (Integrados e Adaptados) --- */
+.iris-classifier-container {
+    background-color: rgba(40, 40, 60, 0.6); /* Fundo levemente transparente para destacar */
+    padding: 30px;
+    border-radius: 10px;
+    margin: 40px auto; /* Centralizar e dar margem */
+    max-width: 900px; /* Limitar largura */
+    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
 }
 
-.titulo-lista-footer{
-    font-weight: bolder;
-    font-size: clamp(9px, 1vw, 1vw);
+.classifier-title,
+#irisClassifierApp h3 { /* Títulos dentro do classificador */
+    color: #e0e0e0; /* Cor clara para títulos */
+    text-align: center;
+    margin-bottom: 25px;
+}
+
+.controls-section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+    margin-bottom: 30px;
+}
+
+.model-selector-container {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+.model-selector-container label {
+    font-size: 1.1em;
+    color: #c0c0c0;
+}
+
+#modelSelector {
+    padding: 10px;
+    border-radius: 5px;
+    border: 1px solid #555;
+    background-color: #333;
+    color: #f0f0f0;
+    font-size: 1em;
+}
+
+.controls-section button, 
+.prediction-section button {
+    padding: 12px 25px;
+    margin: 5px; /* Reduzida margem se estiverem próximos */
+    border: none;
+    cursor: pointer;
+    background-color: #F48B29; /* Laranja original */
+    color: white;
+    border-radius: 5px;
+    font-size: 1em; /* Ajustado */
+    font-weight: bold;
+    transition: background-color 0.3s ease, transform 0.1s ease;
+}
+
+.controls-section button:hover,
+.prediction-section button:hover {
+    background-color: #E07A1F;
+    transform: translateY(-1px);
+}
+
+.controls-section button:disabled,
+.prediction-section button:disabled {
+    background-color: #555; /* Cinza mais escuro para desabilitado */
+    color: #999;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.classifier-hr {
+    border: 0;
+    height: 1px;
+    background: #444; /* Linha mais escura */
+    margin: 30px 0;
+}
+
+.prediction-section {
+    text-align: center;
+}
+.prediction-section h3 {
+    margin-bottom: 20px;
+}
+
+
+.form-group {
+  margin-bottom: 15px;
+  display: flex; /* Para alinhar inputs lado a lado se necessário */
+  justify-content: center;
+  gap: 10px;
+  flex-wrap: wrap; /* Quebra linha em telas menores */
+}
+
+input[type="number"] {
+  padding: 10px;
+  width: 200px; /* Ajustado */
+  margin: 5px;
+  border: 1px solid #666; /* Borda mais escura */
+  border-radius: 4px;
+  text-align: center;
+  font-size: 1em;
+  background-color: #2d2d2d; /* Fundo escuro para inputs */
+  color: #f0f0f0; /* Texto claro */
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+input[type="number"]:focus {
+  border-color: #F48B29; /* Laranja no foco */
+  box-shadow: 0 0 8px rgba(244, 139, 41, 0.4);
+  outline: none;
+}
+
+#resultadoPredict {
+  margin-top: 20px;
+  padding: 12px;
+  border-radius: 4px;
+  font-size: 1.1em;
+  font-weight: bold;
+  display: none;
+  margin-left: auto;
+  margin-right: auto;
+  max-width: 600px; /* Ajustado */
+  border-width: 2px;
+  border-style: solid;
+  text-align: center;
+}
+
+#resultadoPredict.success {
+  background: #2a5c3833; /* Verde com transparência */
+  color: #a1e0b3;      
+  border-color: #88A039;
+}
+
+#resultadoPredict.error {
+  background: #bf3a2133; /* Vermelho com transparência */
+  color: #f7b2a3;      
+  border-color: #E85D39;
+}
+
+#testResultsContainer {
+  margin-top: 30px;
+  background: rgba(45, 45, 65, 0.7); /* Fundo para resultados de teste */
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.2);
+  display: none;
+  text-align: left; /* Mantido */
+}
+#testResultsContainer h3 { /* Título dentro dos resultados de teste */
+    color: #d0d0d0;
+    border-bottom: 1px solid #555;
     padding-bottom: 10px;
 }
 
-footer a:hover{
-    font-weight: bolder;
+.model-results-section {
+    border: 1px solid #4a4a6a; /* Borda mais escura */
+    padding: 20px;
+    margin-bottom: 25px;
+    border-radius: 6px;
+    background-color: rgba(30, 30, 50, 0.5); /* Fundo da seção do modelo */
+}
+.model-results-section h3 { /* Título dos resultados do modelo KNN/SVM/etc */
+    color: #c0c0ff;
+    margin-bottom: 15px;
+    text-align: left;
 }
 
-footer a img:hover{
-   transform: scale(1.3);
+
+.metrics-grid, .graphs-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); /* Ajustado minmax */
+    gap: 20px; /* Ajustado gap */
+    margin-top: 15px;
 }
 
+.metrics-block {
+    background-color: rgba(25, 25, 45, 0.6);
+    padding: 15px;
+    border-radius: 5px;
+}
+.metrics-block h4 {
+  margin-bottom: 10px;
+  border-bottom: 2px solid #88A039; 
+  padding-bottom: 5px;
+  color: #b0b0e0; /* Cor para os títulos h4 das métricas */
+}
+.metrics-block p {
+  margin: 8px 0;
+  font-size: 0.95em; /* Ajustado */
+  color: #d0d0d0; /* Cor para o texto das métricas */
+}
 
+.graph-container {
+    text-align: center;
+    background-color: rgba(25, 25, 45, 0.6);
+    padding: 15px;
+    border-radius: 5px;
+}
+.graph-container h4{
+    margin-bottom: 10px;
+    color: #b0b0e0;
+}
 
+.graph {
+  margin-top: 10px;
+  max-width: 100%;
+  height: auto;
+  border: 1px solid #555; /* Borda mais escura para o gráfico */
+  border-radius: 4px;
+  background-color: #fff; /* Fundo branco para gráficos PNG para melhor visualização */
+}
+
+#loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 15px; /* Aumentado gap */
+  margin-top: 20px;
+  padding: 20px 0;
+  color: #f0f0f0; /* Cor do texto de loading */
+}
+.spinner {
+  display: inline-block;
+  width: 40px;
+  height: 40px;
+  border: 4px solid #F48B29; 
+  border-top-color: transparent;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+#resultsContent {
+  display: none; /* Mantido */
+}
+
+/* Responsividade básica para o classificador */
+@media (max-width: 768px) {
+    .iris-classifier-container {
+        margin: 20px 10px;
+        padding: 20px;
+    }
+    .form-group {
+        flex-direction: column; /* Inputs um abaixo do outro */
+        align-items: center;
+    }
+    input[type="number"] {
+        width: 90%; /* Inputs ocupam mais largura */
+    }
+    .metrics-grid, .graphs-grid {
+        grid-template-columns: 1fr; /* Uma coluna em telas menores */
+    }
+}

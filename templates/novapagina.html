@@ -4,24 +4,20 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Aprendizagem de Máquinas</title>
-    <link rel="stylesheet" href="/static/estilos.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='estilos.css') }}">
 </head>
 <body>
-
     <header>
-        <nav >   
-
+        <nav>   
             <div class="imagem-descricao">
                 <div>
-                    <img class="imagem-menu" src="/assets/logo-menu.svg" alt="logo">
+                    <img class="imagem-menu" src="{{ url_for('static', filename='assets/logo-menu.svg') }}" alt="logo">
                 </div>
-
                 <div class="rotulo-imagem">
                     <span>Modelos de Aprendizagem</span>
                     <span>de Máquina</span>
                 </div>
             </div>
-        
             <ul class="container-nav"> 
                 <li class="dropdown">
                     <a href="#">Modelos</a> 
@@ -32,7 +28,6 @@
                         <a href="#">Redes Neurais</a>                        
                     </div>                    
                 </li>
-
                 <li class="dropdown">
                     <a href="#">Datasets</a>  
                     <div class="dropdown-menu">
@@ -44,7 +39,6 @@
                         <a href="#">Exercícios físicos e medidas corporais</a>              
                     </div>
                 </li>
-
                 <li class="dropdown">
                     <a href="#">Instruções</a>  
                     <div class="dropdown-menu">
@@ -54,8 +48,6 @@
                         <a href="#">Como salvar os resultados</a>                   
                     </div>
                 </li>
-
-                
                 <li class="dropdown">
                     <a href="#">Usuário</a>   
                     <div class="dropdown-menu">
@@ -64,21 +56,15 @@
                         <a href="#">Histórico de predições</a>                                           
                     </div>                    
                 </li>            
-                
             </ul>
-            
-            
-    </nav>
-
+        </nav>
     </header>
 
     <main>
-        <img class="tema-fundo" src="/assets/tema-fundo.png" alt="tema de fundo">
-
-       
+        <img class="tema-fundo" src="{{ url_for('static', filename='assets/tema-fundo.png') }}" alt="tema de fundo">
         <div class="secoes">
             <div>
-                <img class="imagem-secao" src="/assets/knn.svg" >
+                <img class="imagem-secao" src="{{ url_for('static', filename='assets/knn.svg') }}" >
                 <span>KNN</span>
                 <p>
                     O algoritmo KNN (K-Nearest Neighbors), ou K-Vizinhos Mais Próximos, 
@@ -86,14 +72,10 @@
                     Ele é simples, intuitivo e funciona com base na proximidade entre os 
                     dados...
                 </p>
-
-                <a href="#">
-                    <img src="/assets/seta.svg">
-                </a>                
+                <a href="#"><img src="{{ url_for('static', filename='assets/seta.svg') }}"></a>                
             </div>
-
             <div>
-                <img class="imagem-secao" src="/assets/flor.svg" >
+                <img class="imagem-secao" src="{{ url_for('static', filename='assets/flor.svg') }}" >
                 <span>Flor de Íris</span>
                 <p>
                     O dataset Irisé um dos conjuntos de dados mais famosos e amplamente 
@@ -101,13 +83,10 @@
                     classificação supervisionada. Ele foi introduzido pelo estatístico 
                     britânico Ronald A. Fisher...
                 </p>
-                 <a href="#">
-                    <img src="/assets/seta.svg">
-                </a>
+                 <a href="#"><img src="{{ url_for('static', filename='assets/seta.svg') }}"></a>
             </div>
-
             <div>
-                <img class="imagem-secao" src="/assets/sobre.svg" >
+                <img class="imagem-secao" src="{{ url_for('static', filename='assets/sobre.svg') }}" >
                 <span>Sobre</span>
                 <p>
                     A plataforma fonece um ambiente totalmente gratuito para testes
@@ -115,13 +94,10 @@
                     democratizar o acesso a modelos capazes de fazer predições em base
                     dados...
                 </p>
-                 <a href="#">
-                    <img src="/assets/seta.svg">
-                </a>                
+                 <a href="#"><img src="{{ url_for('static', filename='assets/seta.svg') }}"></a>                
             </div>
-
             <div>
-                <img class="imagem-secao" src="/assets/salve.svg" >
+                <img class="imagem-secao" src="{{ url_for('static', filename='assets/salve.svg') }}" >
                 <span>Dados Salvos</span>
                 <p>
                     Utilize a ferramenta de forma totalmente gratuita e salve seus 
@@ -129,22 +105,68 @@
                     as vezes que usar a ferramenta, faça o login, realise seus trabalhos
                     com os modelos disponibilizados e salve tudo...
                 </p>
-                 <a href="#">
-                    <img src="/assets/seta.svg">
-                </a>                
+                 <a href="#"><img src="{{ url_for('static', filename='assets/seta.svg') }}"></a>                
             </div>
-
         </div>
 
         <div class="barra">
              <h1>Comece a usar os modelos de Aprendizagem de Maquina agora mesmo!</h1>
-
         </div>
+
+        <section id="irisClassifierApp" class="iris-classifier-container">
+            <h2 class="classifier-title">Classificador Interativo de Íris</h2>
+            <div class="controls-section">
+              <div class="model-selector-container">
+                <label for="modelSelector">Selecionar Modelo:</label>
+                <select id="modelSelector">
+                  {% if available_models %}
+                    {% for key, name in available_models.items() %}
+                      <option value="{{ key }}">{{ name }}</option>
+                    {% endfor %}
+                  {% else %}
+                    <option value="" disabled>Nenhum modelo disponível</option>
+                  {% endif %}
+                </select>
+              </div>
+              <div>
+                <button id="btnTreinar">Treinar Todos os Modelos</button>
+                <button id="btnTestar" disabled>Testar Modelo Selecionado</button>
+              </div>
+            </div>
+            
+            <hr class="classifier-hr">
+          
+            <div class="prediction-section">
+              <h3>Fazer Nova Predição</h3>
+              <form id="formPredict">
+                <div class="form-group">
+                  <input type="number" step="any" name="sepal_length" placeholder="Comp. Sépala (cm)" required>
+                  <input type="number" step="any" name="sepal_width" placeholder="Larg. Sépala (cm)" required>
+                </div>
+                <div class="form-group">
+                  <input type="number" step="any" name="petal_length" placeholder="Comp. Pétala (cm)" required>
+                  <input type="number" step="any" name="petal_width" placeholder="Larg. Pétala (cm)" required>
+                </div>
+                <button type="submit" id="btnPredict" disabled>Enviar Valores para Predição</button>
+              </form>
+              <div id="resultadoPredict">Resultado da Predição: </div>
+            </div>
+            
+            <div id="testResultsContainer">
+              <h3 style="text-align: center;">Resultados do Teste do Modelo</h3>
+              <div id="loading">
+                <div class="spinner"></div>
+                <span>Carregando resultados...</span>
+              </div>
+              <div id="resultsContent">
+              </div>
+            </div>
+        </section>
     </main>
 
     <footer>
-
     </footer>
     
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
 </body>
 </html>

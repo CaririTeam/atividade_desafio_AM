@@ -32,9 +32,8 @@ def load_iris_dataset():
 @app.route('/')
 def home():
     load_iris_dataset()
-    # Passa os nomes dos modelos para o template, para popular o menu de seleção
     model_names = {key: details["name"] for key, details in models.items()}
-    return render_template('front.html', available_models=model_names)
+    return render_template('novapagina.html', available_models=model_names)
 
 @app.route('/train', methods=['POST'])
 def train_all_models():
@@ -124,11 +123,11 @@ def generate_metrics_and_plots(model_instance, X_data_train, y_data_train, X_dat
     else: results["decision_surface_b64"] = None
     return results
 
-@app.route('/test_model', methods=['GET']) # Rota renomeada/alterada para testar um modelo específico
+@app.route('/test_model', methods=['GET'])
 def test_single_model():
     global X_train, y_train, X_test, y_test
     
-    model_key = request.args.get('model_key') # Espera um parâmetro 'model_key' (ex: 'knn', 'svm')
+    model_key = request.args.get('model_key')
 
     if not model_key or model_key not in models:
         return jsonify({"error": "Chave de modelo inválida ou não fornecida."}), 400
@@ -146,9 +145,9 @@ def test_single_model():
     results = generate_metrics_and_plots(
         model_instance, X_train, y_train, X_test, y_test, model_display_name
     )
-    return jsonify({model_key: results}) # Retorna os resultados apenas para o modelo solicitado
+    return jsonify({model_key: results})
 
-@app.route('/test_all_models', methods=['GET']) # Nova rota para testar todos os modelos (opcional, pode ser útil)
+@app.route('/test_all_models', methods=['GET'])
 def test_all_available_models():
     global X_train, y_train, X_test, y_test
     
@@ -166,9 +165,8 @@ def test_all_available_models():
         else:
             all_models_trained = False
             response_data[key] = {"error": f"Modelo '{details['name']}' não treinado."}
-            # Poderia optar por não incluir modelos não treinados ou retornar um status de erro geral
     
-    if not any(details["model"] is not None for details in models.values()): # Verifica se pelo menos um modelo foi treinado
+    if not any(details["model"] is not None for details in models.values()):
         return jsonify({"error": "Nenhum modelo foi treinado ainda."}), 400
 
     return jsonify(response_data)
@@ -176,12 +174,12 @@ def test_all_available_models():
 
 @app.route('/predict', methods=['POST'])
 def predict_with_model():
-    global X_train, y_train # y_train é usado para calcular a acurácia de treino do modelo escolhido
+    global X_train, y_train
     
     current_iris_data = load_iris_dataset()
     data = request.json
     
-    model_key = data.get('model_key') # Espera 'model_key' no corpo do JSON da requisição
+    model_key = data.get('model_key')
 
     if not model_key or model_key not in models:
         return jsonify({"error": "Chave de modelo inválida ou não fornecida para predição."}), 400
@@ -193,15 +191,13 @@ def predict_with_model():
     if model_instance is None:
         return jsonify({"error": f"Modelo '{model_display_name}' não treinado. Não é possível fazer predição."}), 400
     
-    if X_train is None or y_train is None: # Checa se houve treino para calcular acc de treino
+    if X_train is None or y_train is None:
         return jsonify({"error": "Dados de treinamento não disponíveis. Treine os modelos primeiro."}), 400
 
     try:
-        feature_keys_map = {name.replace(" (cm)", "").replace(" ", "_").lower(): name for name in current_iris_data.feature_names}
         values = []
         for original_feature_name in current_iris_data.feature_names:
             key_in_data = original_feature_name.replace(" (cm)", "").replace(" ", "_").lower()
-            # Lógica de fallback para encontrar a feature nos dados de entrada
             if key_in_data in data: values.append(float(data[key_in_data]))
             elif original_feature_name.replace(" (cm)", "") in data: values.append(float(data[original_feature_name.replace(" (cm)", "")]))
             elif original_feature_name in data: values.append(float(data[original_feature_name]))
@@ -219,7 +215,6 @@ def predict_with_model():
     pred_index = model_instance.predict([values])[0]
     pred_class_name = current_iris_data.target_names[pred_index]
     
-    # Calcula a acurácia de treino para o modelo selecionado
     acc_train_selected_model = accuracy_score(y_train, model_instance.predict(X_train))
     
     return jsonify({
