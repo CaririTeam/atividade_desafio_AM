@@ -7,8 +7,10 @@ Atualmente, os seguintes modelos estão implementados:
 - Support Vector Machine (SVM)
 - Árvore de Decisão (Decision Tree)
 
-## Equipe CTT (Nome da Sua Equipe Aqui)
-*(Opcional: Adicionar nomes dos membros da equipe aqui ou no final)*
+## Equipe
+- [Francisco Eudo da Silva](https://github.com/franciscoeudo)
+- [Gabriel Vasconcelos Andrade da Silva](https://github.com/vasconcel)
+- [Wagner Fernando Lavandoski Padilha](https://github.com/WagnerLavandoski)
 
 ## Pré-requisitos
 
@@ -19,8 +21,8 @@ Atualmente, os seguintes modelos estão implementados:
 
 1.  **Clone o Repositório da Equipe:**
     ```bash
-    git clone [URL_DO_SEU_REPOSITORIO_NO_GITHUB]
-    cd [NOME_DA_PASTA_DO_PROJETO_CLONADO]
+    git clone https://github.com/CaririTeam/atividade_desafio_AM
+    cd atividade_desafio_AM
     ```
 
 2.  **Crie e Ative um Ambiente Virtual:**
@@ -52,7 +54,6 @@ Atualmente, os seguintes modelos estão implementados:
     ```bash
     python back.py
     ```
-    (Se o seu arquivo principal do Flask tiver outro nome, como `app.py`, use esse nome no comando.)
 
 5.  **Acesse a Aplicação:**
     Abra seu navegador de internet e acesse o seguinte endereço:
@@ -63,14 +64,9 @@ Atualmente, os seguintes modelos estão implementados:
 A estrutura de diretórios principal do projeto é:
 
 ```
-NOME_DO_PROJETO/
-├── assets/                   # Imagens e SVGs usados no layout
-│   ├── background-image.jpg
-│   ├── flor.svg
-│   ├── knn.svg
-│   └── ... (outros assets)
+atividade_desafio_AM/
 ├── static/
-│   ├── assets/               # (Se você moveu os assets para cá)
+│   ├── assets/               
 │   ├── img/
 │   │   └── ctt-logo.png      # Logo da equipe
 │   ├── js/
